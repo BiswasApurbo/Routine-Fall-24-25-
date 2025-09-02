@@ -1,0 +1,17 @@
+{
+  "name": "My Academic Week — Fall 2024–25",
+  "short_name": "Academic Week",
+  "description": "Dynamic class routine app with dark mode and timeline.",
+  "start_url": "/Routine-Fall-24-25-/",
+  "scope": "/Routine-Fall-24-25-/",
+  "display": "standalone",
+  "background_color": "#0b1220",
+  "theme_color": "#007399",
+  "icons": [
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
