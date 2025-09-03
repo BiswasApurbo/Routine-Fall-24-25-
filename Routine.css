@@ -5,25 +5,30 @@ body {
   background: var(--bg);
 }
 
-/* ===== Header layout ===== */
-/* Desktop/Tablet: [Menu] [ABS-centered label] [Actions] */
+/* ================= Header layout ================= */
+/* Default (desktop/tablet): three columns + abs-centered label for true centering */
 .subheader {
   position: relative;
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 1fr auto;   /* [Menu] [spacer] [Actions] */
   align-items: center;
   column-gap: 0.75rem;
+  grid-template-areas: "menu spacer actions";
 }
 
-/* Absolutely centered label (>=640px) */
+/* The label is absolutely centered on wide screens */
 .center-wrap {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
   width: max-content;
+  z-index: 1; /* keep it above */
 }
 
-/* Right-side buttons */
+/* Placeholders for grid areas */
+#menuBtn { grid-area: menu; }
+.subheader .actions { grid-area: actions; }
+
 .subheader .actions {
   display: flex;
   align-items: center;
@@ -32,26 +37,33 @@ body {
   flex-wrap: wrap;
 }
 
-/* ----- Mobile (<640px): label gets its own row, buttons shrink a bit ----- */
-@media (max-width: 639.98px) {
+/* ----- Responsive stack: at ≤1024px, give the label its own row ----- */
+@media (max-width: 1024px) {
   .subheader {
-    grid-template-columns: 1fr 1fr; /* row 2: Menu | Actions */
+    position: static;                    /* no abs context */
     row-gap: 0.5rem;
+    grid-template-columns: 1fr 1fr;      /* 2 columns */
+    grid-template-areas:
+      "label label"                      /* row 1: full-width label */
+      "menu  actions";                   /* row 2: menu left, actions right */
   }
+
+  /* Label becomes a normal block centered */
   .center-wrap {
     position: static !important;
     transform: none !important;
-    grid-column: 1 / -1;         /* full width */
-    justify-self: center;
     width: 100%;
+    grid-area: label;
+    justify-self: center;
     text-align: center;
     margin-bottom: 2px;
   }
-  .subheader .actions {
-    justify-self: end;
-    gap: 0.4rem;
-  }
-  /* Slightly smaller buttons on phones */
+
+  /* Put Menu and actions in their areas */
+  #menuBtn { grid-area: menu; justify-self: start; }
+  .subheader .actions { grid-area: actions; justify-self: end; gap: 0.4rem; }
+
+  /* Slightly smaller buttons on narrower screens */
   .subheader .actions > button,
   #menuBtn {
     padding: 0.35rem 0.6rem !important;
@@ -60,7 +72,7 @@ body {
   }
 }
 
-/* ===== Drawer & Backdrop ===== */
+/* ================= Drawer & Backdrop ================= */
 .backdrop {
   position: fixed; inset: 0; background: rgba(0,0,0,0.45);
   backdrop-filter: blur(2px);
@@ -94,7 +106,7 @@ body.dark .drawer { background: #0f172a; color: #e2e8f0; }
 body.dark .nav-item { background: #0b1220; border: 1px solid #101a2b; }
 body.dark .nav-item.active { background: #0f2430; border-color: #164a5b; }
 
-/* ===== Cards & Timeline ===== */
+/* ================= Cards & Timeline ================= */
 .card {
   background: #ffffff;
   border-radius: 0.5rem;
