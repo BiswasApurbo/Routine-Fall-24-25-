@@ -5,23 +5,56 @@ body {
   background: var(--bg);
 }
 
+/* Layout */
+.app-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 1.25rem;
+}
+@media (max-width: 1024px) {
+  .app-layout { grid-template-columns: 1fr; }
+}
+
+/* Sidebar */
+.sidebar { padding: 1rem; }
+.sidebar-title {
+  font-weight: 800;
+  font-size: 1.125rem;
+  margin-bottom: 0.75rem;
+  color: #007399;
+}
+.nav-list { display: grid; gap: 0.5rem; }
+.nav-item {
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.5rem;
+  background: #f8fafc;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+.nav-item:hover { transform: translateY(-1px); filter: brightness(1.02); }
+.nav-item.active { background: #e0fbfc; border: 1px solid #bce9ec; }
+body.dark .nav-item { background: #0b1220; border: 1px solid #101a2b; }
+body.dark .nav-item.active { background: #0f2430; border-color: #164a5b; }
+
 /* Page card (white in light; dark in dark) */
 .card {
   background: #ffffff;
   border-radius: 0.5rem;
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-body.dark .card { background: #0f172a; } /* slate-900-like */
+body.dark .card { background: #0f172a; }
+.card:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0,0,0,0.15); }
 
-/* Timeline container & spacing */
+/* Timeline container */
 .timeline {
   position: relative;
-  padding-left: 2rem;          /* space for dots */
+  padding-left: 2rem;
   border-left: 2px solid #e5e7eb;
   display: grid;
-  gap: 1rem;                   /* vertical gap between items */
+  gap: 1rem;
 }
-body.dark .timeline { border-left-color: #334155; } /* slate-600 */
+body.dark .timeline { border-left-color: #334155; }
 
 /* Dot */
 .timeline-dot {
@@ -37,26 +70,42 @@ body.dark .timeline { border-left-color: #334155; } /* slate-600 */
 .class-card {
   padding: 1rem;
   border-radius: 0.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+.class-card:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
 
-/* Light mode backgrounds */
-.class-card.theory { background: #eff6ff; } /* blue-50 */
-.class-card.lab    { background: #fff1f2; } /* rose-50 */
+/* Light mode */
+.class-card.theory { background: #eff6ff; }
+.class-card.lab    { background: #fff1f2; }
 
-/* Dark mode backgrounds + subtle borders for separation */
-body.dark .class-card.theory {
-  background: #0b2a33;       /* deep teal */
-  border: 1px solid #0f3a45;
-}
-body.dark .class-card.lab {
-  background: #31161b;       /* deep rose */
-  border: 1px solid #3c1b21;
-}
+/* Dark mode */
+body.dark .class-card.theory { background: #0b2a33; border: 1px solid #0f3a45; }
+body.dark .class-card.lab    { background: #31161b; border: 1px solid #3c1b21; }
 
-/* Muted text that adapts */
-.muted { color: #64748b; }          /* slate-500 */
-body.dark .muted { color: #cbd5e1; }/* slate-300 */
+/* Muted text */
+.muted { color: #64748b; }
+body.dark .muted { color: #cbd5e1; }
 
-/* Semester label adapts */
+/* Semester label */
 .semester-label { font-weight: 600; color: #772D8B; }
 body.dark .semester-label { color: #d6b4e7; }
+
+/* Buttons */
+button { transition: background-color 0.2s ease, transform 0.15s ease, filter 0.15s ease; }
+button:hover { transform: translateY(-1px); filter: brightness(1.1); }
+button:active { transform: scale(0.97); }
+
+/* --- Fade-in animation for timeline entries --- */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.timeline li { opacity: 0; transform: translateY(8px); }
+.timeline li.appear { animation: fadeUp 420ms ease-out forwards; }
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .timeline li,
+  .timeline li.appear {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+}

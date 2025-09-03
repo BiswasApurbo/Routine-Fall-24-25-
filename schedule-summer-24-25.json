@@ -1,0 +1,89 @@
+{
+  "Sunday": [
+    {
+      "code": "01228",
+      "course": "Artificial Intelligence and Expert System",
+      "type": "Theory",
+      "room": "9301",
+      "start": "09:40",
+      "end": "11:10",
+      "dot": "#00A6A6"
+    },
+    {
+      "code": "00233",
+      "course": "Data Communication",
+      "type": "Theory",
+      "room": "9311",
+      "start": "11:20",
+      "end": "12:50",
+      "dot": "#772D8B"
+    },
+    {
+      "code": "00850",
+      "course": "Web Technologies",
+      "type": "Theory",
+      "room": "9308",
+      "start": "13:00",
+      "end": "14:30",
+      "dot": "#F28F3B"
+    }
+  ],
+  "Monday": [
+    {
+      "code": "01228",
+      "course": "Artificial Intelligence and Expert System",
+      "type": "Lab",
+      "room": "DS0107",
+      "start": "08:00",
+      "end": "11:00",
+      "dot": "#00A6A6"
+    },
+    {
+      "code": "00233",
+      "course": "Data Communication",
+      "type": "Lab",
+      "room": "DN0309",
+      "start": "11:00",
+      "end": "14:00",
+      "dot": "#772D8B"
+    },
+    {
+      "code": "00850",
+      "course": "Web Technologies",
+      "type": "Lab",
+      "room": "DS0104",
+      "start": "14:00",
+      "end": "17:00",
+      "dot": "#F28F3B"
+    }
+  ],
+  "Tuesday": [
+    {
+      "code": "01228",
+      "course": "Artificial Intelligence and Expert System",
+      "type": "Theory",
+      "room": "9301",
+      "start": "09:40",
+      "end": "11:10",
+      "dot": "#00A6A6"
+    },
+    {
+      "code": "00233",
+      "course": "Data Communication",
+      "type": "Theory",
+      "room": "9311",
+      "start": "11:20",
+      "end": "12:50",
+      "dot": "#772D8B"
+    },
+    {
+      "code": "00850",
+      "course": "Web Technologies",
+      "type": "Theory",
+      "room": "9308",
+      "start": "13:00",
+      "end": "14:30",
+      "dot": "#F28F3B"
+    }
+  ]
+}

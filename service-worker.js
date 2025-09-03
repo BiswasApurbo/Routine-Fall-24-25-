@@ -1,12 +1,15 @@
 // service-worker.js
-const CACHE_NAME = "routine-app-v1"; // bump to v2, v3 when you release updates
+const CACHE_NAME = "routine-app-v2"; // bump to v4, v5... when you release updates
 
 const ASSETS = [
-  "/Routine-Fall-24-25-/",              // root route
+  "/Routine-Fall-24-25-/",              // root route (GitHub Pages base path)
   "/Routine-Fall-24-25-/index.html",
   "/Routine-Fall-24-25-/Routine.css",
   "/Routine-Fall-24-25-/manifest.webmanifest",
-  "/Routine-Fall-24-25-/icons/icon-512.png"
+  "/Routine-Fall-24-25-/icons/icon-512.png",
+  // Schedules (cache for offline viewing)
+  "/Routine-Fall-24-25-/schedule-fall-24-25.json",
+  "/Routine-Fall-24-25-/schedule-summer-24-25.json"
 ];
 
 // Install: cache core files
@@ -46,22 +49,33 @@ self.addEventListener("fetch", (event) => {
   }
 
   event.respondWith(
-    caches.match(req).then((res) => {
-      return (
-        res ||
-        fetch(req).then((live) => {
-          const copy = live.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
-          return live;
-        })
-      );
-    })
+    caches.match(req).then((res) =>
+      res ||
+      fetch(req).then((live) => {
+        const copy = live.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
+        return live;
+      })
+    )
   );
 });
 
 // Allow page to trigger immediate activation
 self.addEventListener("message", (event) => {
-  if (event.data === "SKIP_WAITING") {
-    self.skipWaiting();
-  }
+  if (event.data === "SKIP_WAITING") self.skipWaiting();
+});
+
+// Focus the app when user clicks a reminder
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if ('focus' in client) return client.focus();
+      }
+      if (clients.openWindow) {
+        return clients.openWindow('/Routine-Fall-24-25-/'); // keep base path
+      }
+    })
+  );
 });
