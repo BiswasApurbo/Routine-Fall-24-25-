@@ -5,17 +5,17 @@ body {
   background: var(--bg);
 }
 
-/* Sub-header row:
-   grid with 3 areas: [Menu] [Semester label centered absolutely] [Actions aligned right] */
+/* ===== Header layout ===== */
+/* Desktop/Tablet: [Menu] [ABS-centered label] [Actions] */
 .subheader {
-  position: relative;         /* for absolute centering of label */
+  position: relative;
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
   column-gap: 0.75rem;
 }
 
-/* Center wrapper ensures the label is pixel-perfect centered regardless of left/right widths */
+/* Absolutely centered label (>=640px) */
 .center-wrap {
   position: absolute;
   left: 50%;
@@ -23,16 +23,44 @@ body {
   width: max-content;
 }
 
-/* Actions (right side) */
+/* Right-side buttons */
 .subheader .actions {
   display: flex;
   align-items: center;
   justify-self: end;
   gap: 0.5rem;
-  flex-wrap: wrap;          /* allow wrap on small screens */
+  flex-wrap: wrap;
 }
 
-/* Drawer + backdrop */
+/* ----- Mobile (<640px): label gets its own row, buttons shrink a bit ----- */
+@media (max-width: 639.98px) {
+  .subheader {
+    grid-template-columns: 1fr 1fr; /* row 2: Menu | Actions */
+    row-gap: 0.5rem;
+  }
+  .center-wrap {
+    position: static !important;
+    transform: none !important;
+    grid-column: 1 / -1;         /* full width */
+    justify-self: center;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 2px;
+  }
+  .subheader .actions {
+    justify-self: end;
+    gap: 0.4rem;
+  }
+  /* Slightly smaller buttons on phones */
+  .subheader .actions > button,
+  #menuBtn {
+    padding: 0.35rem 0.6rem !important;
+    font-size: 0.8rem !important;
+    border-radius: 0.5rem;
+  }
+}
+
+/* ===== Drawer & Backdrop ===== */
 .backdrop {
   position: fixed; inset: 0; background: rgba(0,0,0,0.45);
   backdrop-filter: blur(2px);
@@ -66,7 +94,7 @@ body.dark .drawer { background: #0f172a; color: #e2e8f0; }
 body.dark .nav-item { background: #0b1220; border: 1px solid #101a2b; }
 body.dark .nav-item.active { background: #0f2430; border-color: #164a5b; }
 
-/* Card */
+/* ===== Cards & Timeline ===== */
 .card {
   background: #ffffff;
   border-radius: 0.5rem;
@@ -76,7 +104,6 @@ body.dark .nav-item.active { background: #0f2430; border-color: #164a5b; }
 body.dark .card { background: #0f172a; }
 .card:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0,0,0,0.15); }
 
-/* Timeline */
 .timeline {
   position: relative; padding-left: 2rem; border-left: 2px solid #e5e7eb;
   display: grid; gap: 1rem;
@@ -113,7 +140,7 @@ button { transition: background-color 0.2s ease, transform 0.15s ease, filter 0.
 button:hover { transform: translateY(-1px); filter: brightness(1.1); }
 button:active { transform: scale(0.97); }
 
-/* Fade-in animation for timeline entries */
+/* Timeline fade-in */
 @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 .timeline li { opacity: 0; transform: translateY(8px); }
 .timeline li.appear { animation: fadeUp 420ms ease-out forwards; }
