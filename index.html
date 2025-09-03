@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>My Academic Week — Fall 2024–25</title>
 
-  <!-- Tailwind CSS -->
+  <!-- Tailwind first -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Custom CSS -->
   <link rel="stylesheet" href="Routine.css">
 
   <!-- Fonts -->
@@ -23,42 +25,55 @@
 <body class="text-gray-800">
 
   <div class="max-w-7xl mx-auto p-4 md:p-8">
-    <div class="app-layout">
-      <!-- Sidebar -->
-      <aside class="sidebar card">
-        <h2 class="sidebar-title">Routines</h2>
-        <nav class="nav-list" id="termNav"></nav>
-      </aside>
+    <!-- Header -->
+    <header class="mb-6 md:mb-10">
+      <!-- Title (top-center) -->
+      <h1 class="text-center text-3xl md:text-5xl font-extrabold text-[#007399] leading-tight">
+        My Academic Week
+      </h1>
 
-      <!-- Main -->
-      <div class="main">
-        <!-- Header -->
-        <header class="text-center mb-6 md:mb-10">
-          <h1 class="text-4xl md:text-5xl font-extrabold text-[#007399] mb-2">My Academic Week</h1>
-          <p id="semesterLabel" class="semester-label">Fall 2024–25</p>
-          <div class="mt-4 flex items-center justify-center gap-3">
-            <button id="toggleTheme" class="px-3 py-1.5 rounded-md bg-gray-900 text-white text-sm">Toggle Dark</button>
-            <button id="installBtn" class="px-3 py-1.5 rounded-md bg-[#00A6A6] text-white text-sm">Install App</button>
-            <button id="remindersBtn" class="px-3 py-1.5 rounded-md bg-indigo-600 text-white text-sm">Enable Reminders</button>
-          </div>
-        </header>
+      <!-- Sub-header row: left Menu, center term label (hard-centered), right buttons -->
+      <div class="mt-3 subheader">
+        <!-- Left: Menu -->
+        <button id="menuBtn" class="px-3 py-1.5 rounded-md bg-[#007399] text-white text-sm">Menu</button>
 
-        <!-- Timeline -->
-        <main class="grid grid-cols-1 gap-8">
-          <section class="card p-6">
-            <h2 class="text-2xl font-bold mb-2 text-center">Weekly Schedule Timeline</h2>
-            <p class="text-center muted mb-8">
-              Here is a detailed timeline of the week, showing the sequence of classes and labs from Sunday to Wednesday.
-            </p>
+        <!-- Center: current term label (absolute centered) -->
+        <div class="center-wrap">
+          <p id="semesterLabel" class="semester-label text-center">Fall 2024–25</p>
+        </div>
 
-            <div id="timeline" class="space-y-8"></div>
-          </section>
-        </main>
+        <!-- Right: actions -->
+        <div class="actions">
+          <button id="toggleTheme" class="px-3 py-1.5 rounded-md bg-gray-900 text-white text-sm">Toggle Dark</button>
+          <button id="installBtn" class="px-3 py-1.5 rounded-md bg-[#00A6A6] text-white text-sm">Install App</button>
+          <button id="remindersBtn" class="px-3 py-1.5 rounded-md bg-indigo-600 text-white text-sm">Enable Reminders</button>
+        </div>
       </div>
-    </div>
+    </header>
+
+    <!-- Timeline -->
+    <main class="grid grid-cols-1 gap-8">
+      <section class="card p-6">
+        <h2 class="text-2xl font-bold mb-2 text-center">Weekly Schedule Timeline</h2>
+        <p class="text-center muted mb-8">
+          Here is a detailed timeline of the week, showing the sequence of classes and labs from Sunday to Wednesday.
+        </p>
+        <div id="timeline" class="space-y-8"></div>
+      </section>
+    </main>
   </div>
 
-  <!-- Update banner -->
+  <!-- Slide-in Drawer + Backdrop -->
+  <div id="backdrop" class="backdrop hidden" aria-hidden="true"></div>
+  <aside id="drawer" class="drawer" aria-hidden="true" aria-label="Routines">
+    <div class="drawer-header">
+      <h2 class="sidebar-title m-0">Routines</h2>
+      <button id="closeDrawer" class="px-2 py-1 rounded-md bg-gray-200 text-gray-900 text-sm dark:bg-gray-700 dark:text-gray-100">✕</button>
+    </div>
+    <nav id="termNav" class="nav-list"></nav>
+  </aside>
+
+  <!-- Update banner (hidden by default) -->
   <div id="updateBanner" style="position:fixed;left:0;right:0;bottom:0;display:none;padding:12px;background:#111827;color:white;text-align:center;z-index:9999;">
     A new version is available.
     <button id="reloadBtn" style="margin-left:8px;padding:6px 10px;border-radius:6px;background:#00A6A6;color:white;border:none;">
@@ -66,13 +81,15 @@
     </button>
   </div>
 
+  <!-- App scripts -->
   <script>
+    // --- Terms config
     const TERMS = [
       { id: 'fall-24-25',   name: 'Fall 2024–25',   file: 'schedule-fall-24-25.json' },
       { id: 'summer-24-25', name: 'Summer 2024–25', file: 'schedule-summer-24-25.json' }
     ];
 
-    // --- Dark mode init
+    // --- Dark mode: load saved preference on startup
     (function initTheme() {
       const saved = localStorage.getItem('theme');
       const isDark = saved === 'dark';
@@ -87,7 +104,9 @@
       }
     })();
 
-    document.getElementById('toggleTheme').addEventListener('click', () => {
+    // --- Toggle dark mode + persist
+    const toggle = document.getElementById('toggleTheme');
+    toggle.addEventListener('click', () => {
       const isDark = document.body.classList.toggle('dark');
       if (isDark) {
         document.documentElement.style.setProperty('--bg', '#0b1220');
@@ -102,24 +121,26 @@
       }
     });
 
+    // --- Helpers
     function setSemesterLabel(name) {
       document.getElementById('semesterLabel').textContent = name;
     }
-
     function clearTimeline() { document.getElementById('timeline').innerHTML = ''; }
-
     async function fetchJSON(path) {
       const res = await fetch(path);
       if (!res.ok) throw new Error('Failed to load ' + path);
       return await res.json();
     }
 
-    // --- 24h → 12h conversion
-    function to12Hour(time24) {
-      let [h, m] = time24.split(':').map(Number);
+    // 24h -> 12h format helper
+    function formatHM12(hhmm) {
+      const [hStr, mStr] = hhmm.split(':');
+      let h = parseInt(hStr, 10);
+      const m = parseInt(mStr, 10);
       const ampm = h >= 12 ? 'PM' : 'AM';
-      h = h % 12 || 12;
-      return `${h}:${m.toString().padStart(2,'0')} ${ampm}`;
+      h = h % 12; if (h === 0) h = 12;
+      const mm = m.toString().padStart(2, '0');
+      return `${h}:${mm} ${ampm}`;
     }
 
     function renderSchedule(schedule) {
@@ -139,20 +160,25 @@
         section.innerHTML = `
           <h3 class="text-xl font-bold text-[#007399] mb-4 border-b-2 border-[#00A6A6] pb-2">${day}</h3>
           <ol class="timeline">
-            ${items.map(item => `
-              <li class="relative">
-                <span class="timeline-dot" style="background:${item.dot || '#00A6A6'}"></span>
-                <div class="class-card ${item.type === 'Lab' ? 'lab' : 'theory'}">
-                  <p class="font-semibold">${to12Hour(item.start)} – ${to12Hour(item.end)}</p>
-                  <p>${item.code} ${item.course} (${item.type})</p>
-                  <p class="muted text-sm">Room: ${item.room}</p>
-                </div>
-              </li>
-            `).join('')}
+            ${items.map(item => {
+              const start12 = formatHM12(item.start);
+              const end12 = formatHM12(item.end);
+              return `
+                <li class="relative">
+                  <span class="timeline-dot" style="background:${item.dot || '#00A6A6'}"></span>
+                  <div class="class-card ${item.type === 'Lab' ? 'lab' : 'theory'}">
+                    <p class="font-semibold">${start12} – ${end12}</p>
+                    <p>${item.code} ${item.course} (${item.type})</p>
+                    <p class="muted text-sm">Room: ${item.room}</p>
+                  </div>
+                </li>
+              `;
+            }).join('')}
           </ol>
         `;
         timelineEl.appendChild(section);
 
+        // Fade-in / stagger
         const lis = section.querySelectorAll('.timeline li');
         const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         lis.forEach((li, i) => {
@@ -162,22 +188,55 @@
       });
     }
 
-    function buildSidebar() {
+    // --- Drawer (Menu)
+    const drawer = document.getElementById('drawer');
+    const backdrop = document.getElementById('backdrop');
+    const menuBtn = document.getElementById('menuBtn');
+    const closeDrawerBtn = document.getElementById('closeDrawer');
+
+    function openDrawer() {
+      drawer.classList.add('open');
+      backdrop.classList.remove('hidden');
+      drawer.setAttribute('aria-hidden', 'false');
+      backdrop.setAttribute('aria-hidden', 'false');
+    }
+    function closeDrawer() {
+      drawer.classList.remove('open');
+      backdrop.classList.add('hidden');
+      drawer.setAttribute('aria-hidden', 'true');
+      backdrop.setAttribute('aria-hidden', 'true');
+    }
+    menuBtn.addEventListener('click', openDrawer);
+    closeDrawerBtn.addEventListener('click', closeDrawer);
+    backdrop.addEventListener('click', closeDrawer);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && drawer.classList.contains('open')) closeDrawer();
+    });
+
+    function buildDrawerNav() {
       const nav = document.getElementById('termNav');
       nav.innerHTML = TERMS.map(t => `<button class="nav-item" data-term="${t.id}">${t.name}</button>`).join('');
       nav.querySelectorAll('.nav-item').forEach(btn => {
-        btn.addEventListener('click', () => loadTerm(btn.dataset.term));
+        btn.addEventListener('click', () => {
+          loadTerm(btn.dataset.term);
+          closeDrawer(); // auto-close after selecting
+        });
       });
     }
 
     async function loadTerm(termId) {
       const term = TERMS.find(t => t.id === termId) || TERMS[0];
+
+      // Update active state in drawer
       document.querySelectorAll('.nav-item').forEach(el => {
         el.classList.toggle('active', el.dataset.term === term.id);
       });
+
+      // Update label + persist selection
       setSemesterLabel(term.name);
       localStorage.setItem('selectedTerm', term.id);
 
+      // Load + render schedule
       try {
         const schedule = await fetchJSON(term.file);
         renderSchedule(schedule);
@@ -186,22 +245,28 @@
         renderSchedule({});
       }
 
+      // If reminders are enabled, reschedule for this term
       if (localStorage.getItem('remindersEnabled') === 'true') {
         scheduleAllRemindersForSelectedTerm();
       }
     }
 
-    buildSidebar();
-    loadTerm(localStorage.getItem('selectedTerm') || 'fall-24-25');
+    // --- Init UI
+    buildDrawerNav();
+    const initialTerm = localStorage.getItem('selectedTerm') || 'fall-24-25';
+    loadTerm(initialTerm);
 
     // --- Install App button
     let deferredPrompt;
     const installBtn = document.getElementById('installBtn');
+    installBtn.style.display = 'none';
+
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
       installBtn.style.display = 'inline-flex';
     });
+
     installBtn.addEventListener('click', async () => {
       if (!deferredPrompt) return;
       deferredPrompt.prompt();
@@ -210,7 +275,42 @@
       installBtn.style.display = 'none';
     });
 
-    // --- Reminders
+    // --- PWA registration + update handling (shows banner)
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', async () => {
+        try {
+          const reg = await navigator.serviceWorker.register('./service-worker.js');
+
+          function showUpdateBanner(registration) {
+            const banner = document.getElementById('updateBanner');
+            const reloadBtn = document.getElementById('reloadBtn');
+            banner.style.display = 'block';
+            reloadBtn.onclick = () => registration.waiting.postMessage('SKIP_WAITING');
+            navigator.serviceWorker.addEventListener('controllerchange', () => window.location.reload());
+          }
+
+          function listenForWaitingSW(registration) {
+            if (!registration) return;
+            if (registration.waiting) { showUpdateBanner(registration); return; }
+            registration.addEventListener('updatefound', () => {
+              const newSW = registration.installing;
+              if (!newSW) return;
+              newSW.addEventListener('statechange', () => {
+                if (newSW.state === 'installed' && registration.waiting) showUpdateBanner(registration);
+              });
+            });
+          }
+
+          listenForWaitingSW(reg);
+        } catch (e) {
+          console.error('SW registration failed:', e);
+        }
+      });
+    }
+
+    // =========================
+    //   CLASS REMINDERS (10m)
+    // =========================
     const remindersBtn = document.getElementById('remindersBtn');
     const REMINDERS_KEY = 'remindersEnabled';
     let remindersEnabled = localStorage.getItem(REMINDERS_KEY) === 'true';
@@ -226,7 +326,7 @@
       if (!remindersEnabled) {
         const perm = await Notification.requestPermission();
         if (perm !== 'granted') {
-          alert('Notifications are blocked. Allow them in your browser settings.');
+          alert('Notifications are blocked. Allow them in your browser settings to get reminders.');
           return;
         }
         remindersEnabled = true;
@@ -240,6 +340,7 @@
       updateRemindersButton();
     });
 
+    // Time helpers
     function parseHM(s) { const [h, m] = s.split(':').map(Number); return { h, m }; }
     function nextOccurrence(weekdayIndex, hhmm) {
       const { h, m } = parseHM(hhmm);
@@ -253,8 +354,8 @@
       if (d <= now) d.setDate(d.getDate() + 7);
       return d;
     }
-
     const DOW_MAP = { Sunday:0, Monday:1, Tuesday:2, Wednesday:3, Thursday:4, Friday:5, Saturday:6 };
+
     let reminderTimers = [];
     function clearAllReminderTimers() { reminderTimers.forEach(t => clearTimeout(t)); reminderTimers = []; }
 
@@ -262,7 +363,13 @@
       if ('serviceWorker' in navigator) {
         const reg = await navigator.serviceWorker.getRegistration();
         if (reg) {
-          reg.showNotification(title, { body, icon:'icons/icon-512.png', badge:'icons/icon-512.png', tag:'class-reminder', renotify:true });
+          reg.showNotification(title, {
+            body,
+            icon:'icons/icon-512.png',
+            badge:'icons/icon-512.png',
+            tag:'class-reminder',
+            renotify:true
+          });
           return;
         }
       }
@@ -272,7 +379,7 @@
     function scheduleReminders(scheduleObj) {
       if (!remindersEnabled || Notification.permission !== 'granted') return;
       const now = new Date();
-      const horizon = new Date(now.getTime() + 36 * 60 * 60 * 1000);
+      const horizon = new Date(now.getTime() + 36 * 60 * 60 * 1000); // next 36h
 
       Object.entries(scheduleObj).forEach(([dayName, items]) => {
         const dow = DOW_MAP[dayName];
@@ -282,29 +389,33 @@
           if (reminderAt > now && reminderAt <= horizon) {
             const ms = reminderAt.getTime() - now.getTime();
             const t = setTimeout(() => {
+              const start12 = formatHM12(item.start);
+              const end12 = formatHM12(item.end);
               showClassNotification(
                 `${item.course} starts in 10 minutes`,
-                `${dayName} ${to12Hour(item.start)} – ${to12Hour(item.end)} • Room ${item.room}`
+                `${dayName} ${start12}–${end12} • Room ${item.room}`
               );
+              // schedule again next week
               if (remindersEnabled) {
-                const nextWeek = new Date(reminderAt.getTime() + 7*24*60*60*1000);
+                const nextWeek = new Date(reminderAt.getTime() + 7 * 24 * 60 * 60 * 1000);
                 const ms2 = nextWeek.getTime() - Date.now();
                 reminderTimers.push(setTimeout(() => {
                   showClassNotification(
                     `${item.course} starts in 10 minutes`,
-                    `${dayName} ${to12Hour(item.start)} – ${to12Hour(item.end)} • Room ${item.room}`
+                    `${dayName} ${start12}–${end12} • Room ${item.room}`
                   );
-                }, Math.max(ms2,0)));
+                }, Math.max(ms2, 0)));
               }
-            }, Math.max(ms,0));
+            }, Math.max(ms, 0));
             reminderTimers.push(t);
           }
         });
       });
 
+      // Re-schedule after midnight to pick up the next day
       const midnight = new Date(); midnight.setHours(24,0,5,0);
       const msToMidnight = midnight.getTime() - now.getTime();
-      reminderTimers.push(setTimeout(() => scheduleAllRemindersForSelectedTerm(), Math.max(msToMidnight,5000)));
+      reminderTimers.push(setTimeout(() => scheduleAllRemindersForSelectedTerm(), Math.max(msToMidnight, 5000)));
     }
 
     async function scheduleAllRemindersForSelectedTerm() {
@@ -314,9 +425,12 @@
         const scheduleObj = await (await fetch(term.file)).json();
         clearAllReminderTimers();
         scheduleReminders(scheduleObj);
-      } catch(e) { console.warn('Failed to schedule reminders:', e); }
+      } catch (e) {
+        console.warn('Failed to schedule reminders:', e);
+      }
     }
 
+    // Auto-schedule on load if previously enabled
     if (localStorage.getItem('remindersEnabled') === 'true' && Notification.permission === 'granted') {
       scheduleAllRemindersForSelectedTerm();
     }

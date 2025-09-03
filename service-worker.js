@@ -1,5 +1,5 @@
 // service-worker.js
-const CACHE_NAME = "routine-app-v2"; // bump to v4, v5... when you release updates
+const CACHE_NAME = "routine-app-v3"; // bump to v4, v5... when you release updates
 
 const ASSETS = [
   "/Routine-Fall-24-25-/",              // root route (GitHub Pages base path)
