@@ -27,26 +27,25 @@
   <div class="max-w-7xl mx-auto p-4 md:p-8">
     <!-- Header -->
     <header class="mb-6 md:mb-10">
-      <!-- Title (top-center) -->
       <h1 class="text-center text-3xl md:text-5xl font-extrabold text-[#007399] leading-tight">
         My Academic Week
       </h1>
 
-      <!-- Sub-header row: left Menu, center term label (hard-centered), right buttons -->
+      <!-- Sub-header: left Menu, centered label (own grid cell), right actions -->
       <div class="mt-3 subheader">
         <!-- Left: Menu -->
         <button id="menuBtn" class="px-3 py-1.5 rounded-md bg-[#007399] text-white text-sm">Menu</button>
 
-        <!-- Center: current term label (absolute centered) -->
+        <!-- Center: label (now sits in grid-area: label; no absolute) -->
         <div class="center-wrap">
           <p id="semesterLabel" class="semester-label text-center">Fall 2024–25</p>
         </div>
 
-        <!-- Right: actions -->
+        <!-- Right: actions (Install → Enable Reminders → Dark) -->
         <div class="actions">
-          <button id="toggleTheme" class="px-3 py-1.5 rounded-md bg-gray-900 text-white text-sm">Toggle Dark</button>
-          <button id="remindersBtn" class="px-3 py-1.5 rounded-md bg-indigo-600 text-white text-sm">Enable Reminders</button>
           <button id="installBtn" class="px-3 py-1.5 rounded-md bg-[#00A6A6] text-white text-sm">Install App</button>
+          <button id="remindersBtn" class="px-3 py-1.5 rounded-md bg-indigo-600 text-white text-sm">Enable Reminders</button>
+          <button id="toggleTheme" class="px-3 py-1.5 rounded-md bg-gray-900 text-white text-sm">Toggle Dark</button>
         </div>
       </div>
     </header>
@@ -71,6 +70,13 @@
       <button id="closeDrawer" class="px-2 py-1 rounded-md bg-gray-200 text-gray-900 text-sm dark:bg-gray-700 dark:text-gray-100">✕</button>
     </div>
     <nav id="termNav" class="nav-list"></nav>
+
+    <!-- Drawer footer: Disable Reminders (only visible when enabled) -->
+    <div class="drawer-footer">
+      <button id="disableRemindersDrawer" class="w-full px-3 py-1.5 rounded-md bg-gray-600 text-white text-sm" style="display:none;">
+        Disable Reminders
+      </button>
+    </div>
   </aside>
 
   <!-- Update banner (hidden by default) -->
@@ -258,21 +264,21 @@
 
     // --- Install App button
     let deferredPrompt;
-    const installBtn = document.getElementById('installBtn');
-    installBtn.style.display = 'none';
+    const installBtnEl = document.getElementById('installBtn');
+    installBtnEl.style.display = 'none';
 
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      installBtn.style.display = 'inline-flex';
+      installBtnEl.style.display = 'inline-flex';
     });
 
-    installBtn.addEventListener('click', async () => {
+    installBtnEl.addEventListener('click', async () => {
       if (!deferredPrompt) return;
       deferredPrompt.prompt();
       await deferredPrompt.userChoice;
       deferredPrompt = null;
-      installBtn.style.display = 'none';
+      installBtnEl.style.display = 'none';
     });
 
     // --- PWA registration + update handling (shows banner)
@@ -312,32 +318,37 @@
     //   CLASS REMINDERS (10m)
     // =========================
     const remindersBtn = document.getElementById('remindersBtn');
+    const disableRemindersDrawer = document.getElementById('disableRemindersDrawer');
     const REMINDERS_KEY = 'remindersEnabled';
     let remindersEnabled = localStorage.getItem(REMINDERS_KEY) === 'true';
 
-    function updateRemindersButton() {
-      remindersBtn.textContent = remindersEnabled ? 'Disable Reminders' : 'Enable Reminders';
-      remindersBtn.classList.toggle('bg-indigo-600', !remindersEnabled);
-      remindersBtn.classList.toggle('bg-gray-600', remindersEnabled);
+    function updateReminderControls() {
+      // Header "Enable Reminders" shows only when NOT enabled
+      remindersBtn.style.display = remindersEnabled ? 'none' : 'inline-flex';
+      // Drawer "Disable Reminders" shows only when enabled
+      disableRemindersDrawer.style.display = remindersEnabled ? 'inline-flex' : 'none';
     }
-    updateRemindersButton();
+    updateReminderControls();
 
     remindersBtn.addEventListener('click', async () => {
-      if (!remindersEnabled) {
-        const perm = await Notification.requestPermission();
-        if (perm !== 'granted') {
-          alert('Notifications are blocked. Allow them in your browser settings to get reminders.');
-          return;
-        }
-        remindersEnabled = true;
-        localStorage.setItem(REMINDERS_KEY, 'true');
-        scheduleAllRemindersForSelectedTerm();
-      } else {
-        remindersEnabled = false;
-        localStorage.setItem(REMINDERS_KEY, 'false');
-        clearAllReminderTimers();
+      // Only enables (no toggle in header)
+      const perm = await Notification.requestPermission();
+      if (perm !== 'granted') {
+        alert('Notifications are blocked. Allow them in your browser settings to get reminders.');
+        return;
       }
-      updateRemindersButton();
+      remindersEnabled = true;
+      localStorage.setItem(REMINDERS_KEY, 'true');
+      updateReminderControls();
+      scheduleAllRemindersForSelectedTerm();
+    });
+
+    disableRemindersDrawer.addEventListener('click', () => {
+      remindersEnabled = false;
+      localStorage.setItem(REMINDERS_KEY, 'false');
+      clearAllReminderTimers();
+      updateReminderControls();
+      alert('Class reminders disabled.');
     });
 
     // Time helpers
@@ -432,6 +443,8 @@
 
     // Auto-schedule on load if previously enabled
     if (localStorage.getItem('remindersEnabled') === 'true' && Notification.permission === 'granted') {
+      remindersEnabled = true;
+      updateReminderControls();
       scheduleAllRemindersForSelectedTerm();
     }
   </script>

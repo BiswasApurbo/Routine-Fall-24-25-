@@ -6,30 +6,24 @@ body {
 }
 
 /* ================= Header layout ================= */
-/* Default (desktop/tablet): three columns + abs-centered label for true centering */
+/* Desktop/tablet: three areas: [menu] [label] [actions] */
 .subheader {
-  position: relative;
   display: grid;
-  grid-template-columns: auto 1fr auto;   /* [Menu] [spacer] [Actions] */
   align-items: center;
   column-gap: 0.75rem;
-  grid-template-areas: "menu spacer actions";
+  grid-template-columns: auto 1fr auto;   /* menu | label | actions */
+  grid-template-areas: "menu label actions";
+  min-height: 42px;
 }
 
-/* The label is absolutely centered on wide screens */
-.center-wrap {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  width: max-content;
-  z-index: 1; /* keep it above */
-}
-
-/* Placeholders for grid areas */
 #menuBtn { grid-area: menu; }
-.subheader .actions { grid-area: actions; }
-
+.center-wrap {
+  grid-area: label;
+  justify-self: center;
+  text-align: center;
+}
 .subheader .actions {
+  grid-area: actions;
   display: flex;
   align-items: center;
   justify-self: end;
@@ -37,33 +31,21 @@ body {
   flex-wrap: wrap;
 }
 
-/* ----- Responsive stack: at ≤1024px, give the label its own row ----- */
+.semester-label { font-weight: 600; color: #772D8B; }
+body.dark .semester-label { color: #d6b4e7; }
+
+/* ----- Responsive stack: at ≤1024px, label gets its own row ----- */
 @media (max-width: 1024px) {
   .subheader {
-    position: static;                    /* no abs context */
     row-gap: 0.5rem;
-    grid-template-columns: 1fr 1fr;      /* 2 columns */
+    grid-template-columns: 1fr 1fr;
     grid-template-areas:
-      "label label"                      /* row 1: full-width label */
-      "menu  actions";                   /* row 2: menu left, actions right */
+      "label label"
+      "menu  actions";
   }
-
-  /* Label becomes a normal block centered */
-  .center-wrap {
-    position: static !important;
-    transform: none !important;
-    width: 100%;
-    grid-area: label;
-    justify-self: center;
-    text-align: center;
-    margin-bottom: 2px;
-  }
-
-  /* Put Menu and actions in their areas */
-  #menuBtn { grid-area: menu; justify-self: start; }
-  .subheader .actions { grid-area: actions; justify-self: end; gap: 0.4rem; }
-
-  /* Slightly smaller buttons on narrower screens */
+  #menuBtn { justify-self: start; }
+  .center-wrap { justify-self: center; }
+  .subheader .actions { justify-self: end; gap: 0.4rem; }
   .subheader .actions > button,
   #menuBtn {
     padding: 0.35rem 0.6rem !important;
@@ -83,17 +65,16 @@ body {
   background: #ffffff; color: #111827; z-index: 41;
   box-shadow: 2px 0 12px rgba(0,0,0,0.15);
   transform: translateX(-100%); transition: transform 0.25s ease;
-  display: flex; flex-direction: column; padding: 1rem;
+  display: flex; flex-direction: column;
 }
 .drawer.open { transform: translateX(0); }
 body.dark .drawer { background: #0f172a; color: #e2e8f0; }
 .drawer-header {
-  display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;
+  display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
 }
-
-/* Drawer nav list */
 .sidebar-title { font-weight: 800; font-size: 1.125rem; color: #007399; }
-.nav-list { display: grid; gap: 0.5rem; }
+.nav-list { display: grid; gap: 0.5rem; padding: 0.75rem 1rem 6rem; overflow: auto; }
 .nav-item {
   text-align: left;
   padding: 0.6rem 0.75rem;
@@ -105,6 +86,13 @@ body.dark .drawer { background: #0f172a; color: #e2e8f0; }
 .nav-item.active { background: #e0fbfc; border: 1px solid #bce9ec; }
 body.dark .nav-item { background: #0b1220; border: 1px solid #101a2b; }
 body.dark .nav-item.active { background: #0f2430; border-color: #164a5b; }
+
+.drawer-footer {
+  margin-top: auto;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid rgba(0,0,0,0.08);
+}
+body.dark .drawer-footer { border-top-color: rgba(255,255,255,0.12); }
 
 /* ================= Cards & Timeline ================= */
 .card {
@@ -144,8 +132,6 @@ body.dark .class-card.lab    { background: #31161b; border: 1px solid #3c1b21; }
 /* Text */
 .muted { color: #64748b; }
 body.dark .muted { color: #cbd5e1; }
-.semester-label { font-weight: 600; color: #772D8B; }
-body.dark .semester-label { color: #d6b4e7; }
 
 /* Buttons (general) */
 button { transition: background-color 0.2s ease, transform 0.15s ease, filter 0.15s ease; }
